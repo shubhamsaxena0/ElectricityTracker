@@ -669,96 +669,11 @@ function updateDashboard(row) {
 
 function updateMonthlyAnalysis(data) {
 
-    const monthlyData =
-        buildMonthlyData(data);
-
-
     updateCurrentMonth(
         data
     );
 
 }
-
-
-/* =====================================================
-   BUILD MONTHLY DATA
-===================================================== */
-
-function buildMonthlyData(data) {
-
-    const months = {};
-
-
-    data.forEach(row => {
-
-        const month =
-            row.reading_date.substring(
-                0,
-                7
-            );
-
-
-        if (!months[month]) {
-
-            months[month] = {
-
-                solar: 0,
-
-                consumption: 0,
-
-                import: 0,
-
-                export: 0,
-
-                days: 0
-
-            };
-
-        }
-
-
-        months[month].solar +=
-            Number(
-                row.solar_production || 0
-            );
-
-
-        months[month].consumption +=
-            Number(
-                row.import_so_far || 0
-            );
-
-
-        months[month].import +=
-            Number(
-                row.grid_import || 0
-            );
-
-
-        months[month].export +=
-            Number(
-                row.grid_export || 0
-            );
-
-
-        /*
-           A day is counted only when
-           consumption has been calculated.
-        */
-
-        if (row.import_so_far !== null) {
-
-            months[month].days++;
-
-        }
-
-    });
-
-
-    return months;
-
-}
-
 
 /* =====================================================
    CURRENT MONTH
@@ -806,11 +721,13 @@ function updateCurrentMonth(
 
     let solar = 0;
 
-    let consumption = 0;
+    let gridImport =  Number(
+                rows[0].import_so_far || 0
+            );
 
-    let gridImport = 0;
-
-    let gridExport = 0;
+    let gridExport = Number(
+                rows[0].export_so_far || 0
+            );
 
 
     rows.forEach(row => {
@@ -820,31 +737,13 @@ function updateCurrentMonth(
                 row.solar_production || 0
             );
 
-
-        consumption +=
-            Number(
-                row.import_so_far || 0
-            );
-
-
-        gridImport +=
-            Number(
-                row.grid_import || 0
-            );
-
-
-        gridExport +=
-            Number(
-                row.grid_export || 0
-            );
-
     });
 
 
     const daysWithConsumption =
         rows.filter(
             row =>
-                row.import_so_far !== null
+                row.grid_import !== null
         ).length;
 
 
@@ -854,33 +753,9 @@ function updateCurrentMonth(
             : 0;
 
 
-    const solarUsedAtHome =
-        Math.max(
-            0,
-            solar - gridExport
-        );
-
-
-    const coverage =
-        consumption > 0
-            ? (
-                solarUsedAtHome /
-                consumption
-            ) * 100
-            : 0;
-
-
     setText(
         "monthSolar",
         formatNumber(solar)
-    );
-
-
-    setText(
-        "monthConsumption",
-        daysWithConsumption > 0
-            ? formatNumber(consumption)
-            : "-"
     );
 
 
@@ -899,15 +774,6 @@ function updateCurrentMonth(
             : "-"
     );
 
-
-    setText(
-        "monthCoverage",
-        daysWithConsumption > 0
-            ? `${formatNumber(
-                coverage
-            )}%`
-            : "-"
-    );
 	
 	 setText(
         "monthAvgImport",
@@ -984,14 +850,12 @@ function generateForecast(
 
     let solar = 0;
 
-    let consumption = 0;
-
     let gridImport = 0;
 
     let gridExport = 0;
 
 
-    let validConsumptionDays = 0;
+    let validConsumptionDays = new Date().getDate()-1;
 
 
     rows.forEach(row => {
@@ -1000,30 +864,26 @@ function generateForecast(
             Number(
                 row.solar_production || 0
             );
+			
 
+    });
+	
+      if (rows.length > 0) {
 
-        if (row.import_so_far !== null) {
-
-            consumption +=
+          
+            gridImport =
                 Number(
-                    row.import_so_far
-                );
-
-            gridImport +=
-                Number(
-                    row.grid_import || 0
+                    rows[0].import_so_far || 0
                 );
 
             gridExport +=
                 Number(
-                    row.grid_export || 0
+                     rows[0].export_so_far || 0
                 );
 
-            validConsumptionDays++;
 
         }
 
-    });
 
 
     if (daysRecorded === 0) {
@@ -1046,13 +906,6 @@ function generateForecast(
        Average daily values where
        meter-difference data exists.
     */
-
-    const avgConsumption =
-        validConsumptionDays > 0
-            ? consumption /
-              validConsumptionDays
-            : 0;
-
 
     const avgImport =
         validConsumptionDays > 0
@@ -1141,13 +994,161 @@ function generateForecast(
             }
         );
 
+	const estimatedBillInfo = calculateApproxBill(forecastImport, forecastExport)
 
     setText(
         "forecastDescription",
 
-        `Estimated ${monthName} total based on ${daysRecorded} recorded day${daysRecorded === 1 ? "" : "s"} and the average daily values so far`
+        `Estimated ${monthName} bill based on ${formatNumber(forecastImport)} import and ${formatNumber(forecastExport)} export is: ₹${formatNumber(estimatedBillInfo.totalEstimatedBill)} [Energy Charges: ${formatNumber(estimatedBillInfo.energyCharge)}, Electricity Duty: ${formatNumber(estimatedBillInfo.electricityDuty)}, Fixed Charge: ${formatNumber(estimatedBillInfo.fixedCharge)}]`
     );
 
+}
+
+
+/* =====================================================
+   Bill Calculation
+===================================================== */
+
+function calculateApproxBill(importUnits, exportUnits) {
+
+    importUnits = Number(importUnits) || 0;
+    exportUnits = Number(exportUnits) || 0;
+
+    // --------------------------------------------------------
+    // Net billable units
+    // --------------------------------------------------------
+
+    const netUnits = Math.max(
+        0,
+        importUnits - exportUnits
+    );
+
+
+    // --------------------------------------------------------
+    // Energy Charges - FY 2026-27
+    // LV-1.2 Domestic
+    // --------------------------------------------------------
+
+    let remaining = netUnits;
+    let energyCharge = 0;
+
+    // First 50 units
+    const slab1 = Math.min(remaining, 50);
+
+    energyCharge += slab1 * 4.71;
+    remaining -= slab1;
+
+
+    // 51 - 150
+    if (remaining > 0) {
+
+        const slab2 = Math.min(
+            remaining,
+            100
+        );
+
+        energyCharge += slab2 * 5.67;
+        remaining -= slab2;
+    }
+
+
+    // 151 - 300
+    if (remaining > 0) {
+
+        const slab3 = Math.min(
+            remaining,
+            150
+        );
+
+        energyCharge += slab3 * 7.05;
+        remaining -= slab3;
+    }
+
+
+    // Above 300
+    if (remaining > 0) {
+
+        energyCharge +=
+            remaining * 7.24;
+    }
+
+
+    // --------------------------------------------------------
+    // Fixed Charge
+    //
+    // Up to 50 units       = ₹81
+    // 51-150 units         = ₹134
+    // Above 150 units:
+    // every 15 units or part thereof = 0.1 kW
+    // Urban = ₹30 per 0.1 kW
+    // --------------------------------------------------------
+
+    let fixedCharge = 0;
+
+    if (importUnits <= 50) {
+
+        fixedCharge = 81;
+
+    } else if (importUnits <= 150) {
+
+        fixedCharge = 134;
+
+    } else {
+
+        const fixedChargeUnits =
+            Math.ceil(importUnits / 15);
+
+        fixedCharge =
+            fixedChargeUnits * 30;
+    }
+
+
+    // --------------------------------------------------------
+    // Electricity Duty
+    //
+    // Up to 100 units = 9%
+    // Above 100 units = 12%
+    //
+    // Applied to energy charges
+    // --------------------------------------------------------
+
+    const dutyRate =
+        netUnits <= 100
+            ? 0.09
+            : 0.12;
+
+    const electricityDuty =
+        energyCharge * dutyRate;
+
+
+    // --------------------------------------------------------
+    // Total
+    // --------------------------------------------------------
+
+    const total =
+        energyCharge +
+        fixedCharge +
+        electricityDuty;
+
+
+    return {
+
+        energyCharge: round(
+            energyCharge
+        ),
+
+        fixedCharge: round(
+            fixedCharge
+        ),
+
+        electricityDuty: round(
+            electricityDuty
+        ),
+
+        totalEstimatedBill: round(
+            total
+        )
+    };
 }
 
 
