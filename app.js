@@ -740,11 +740,8 @@ function updateCurrentMonth(
     });
 
 
-    const daysWithConsumption =
-        rows.filter(
-            row =>
-                row.grid_import !== null
-        ).length;
+    const daysWithConsumption = new Date().getDate()-1;
+
 
 
     const averageSolar =
