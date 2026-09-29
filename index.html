@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Electricity Tracker</title>
+
+
+    <!-- =================================================
+         BOOTSTRAP
+    ================================================== -->
+
+    <link
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+    >
+
+
+    <!-- =================================================
+         BOOTSTRAP ICONS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
+    >
+
+
+    <!-- =================================================
+         CUSTOM CSS
+    ================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="style.css"
+    >
+
+</head>
+
+
+<body>
+
+
+<!-- =====================================================
+     NAVBAR
+====================================================== -->
+
+<nav class="navbar navbar-expand-lg bg-dark navbar-dark shadow-sm">
+
+    <div class="container">
+
+        <a
+            class="navbar-brand fw-bold"
+            href="#"
+        >
+
+            <i class="bi bi-lightning-charge-fill text-warning"></i>
+
+            Electricity Tracker
+
+        </a>
+
+
+        <span class="navbar-text text-light">
+
+            <i class="bi bi-calendar3"></i>
+
+            <span id="currentDate"></span>
+
+        </span>
+
+    </div>
+
+</nav>
+
+
+
+<!-- =====================================================
+     MAIN
+====================================================== -->
+
+<main class="container py-4">
+
+
+    <!-- =================================================
+         SUMMARY CARDS
+    ================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- Solar Production -->
+
+        <div class="col-12 col-sm-6 col-lg-3">
+
+            <div class="card summary-card h-100 border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Solar Production
+                            </p>
+
+                            <h3
+                                class="fw-bold mb-0"
+                                id="solarProduction"
+                            >
+                                --
+                            </h3>
+
+                            <small class="text-muted">
+                                kWh
+                            </small>
+
+                        </div>
+
+
+                        <div class="summary-icon solar-icon">
+
+                            <i class="bi bi-sun-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Grid Import -->
+
+        <div class="col-12 col-sm-6 col-lg-3">
+
+            <div class="card summary-card h-100 border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Grid Import
+                            </p>
+
+                            <h3
+                                class="fw-bold mb-0"
+                                id="gridImport"
+                            >
+                                --
+                            </h3>
+
+                            <small class="text-muted">
+                                kWh
+                            </small>
+
+                        </div>
+
+
+                        <div class="summary-icon import-icon">
+
+                            <i class="bi bi-arrow-down-circle-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Grid Export -->
+
+        <div class="col-12 col-sm-6 col-lg-3">
+
+            <div class="card summary-card h-100 border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Grid Export
+                            </p>
+
+                            <h3
+                                class="fw-bold mb-0"
+                                id="gridExport"
+                            >
+                                --
+                            </h3>
+
+                            <small class="text-muted">
+                                kWh
+                            </small>
+
+                        </div>
+
+
+                        <div class="summary-icon export-icon">
+
+                            <i class="bi bi-arrow-up-circle-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- Consumption -->
+
+        <div class="col-12 col-sm-6 col-lg-3">
+
+            <div class="card summary-card h-100 border-0 shadow-sm">
+
+                <div class="card-body">
+
+                    <div class="d-flex justify-content-between">
+
+                        <div>
+
+                            <p class="text-muted mb-1">
+                                Net Monthly Import
+                            </p>
+
+                            <h3
+                                class="fw-bold mb-0"
+                                id="consumption"
+                            >
+                                --
+                            </h3>
+
+                            <small class="text-muted">
+                                kWh
+                            </small>
+
+                        </div>
+
+
+                        <div class="summary-icon consumption-icon">
+
+                            <i class="bi bi-house-fill"></i>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =================================================
+         CURRENT MONTH ANALYSIS + FORECAST
+    ================================================== -->
+
+    <div class="row g-3 mb-4">
+
+
+        <!-- Current Month -->
+
+        <div class="col-12 col-lg-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+
+                    <h5 class="fw-bold mb-4">
+
+                        <i class="bi bi-calendar-month me-2"></i>
+
+                        Current Month
+
+                    </h5>
+
+
+
+                    <div class="row g-3">
+
+
+                        <div class="col-6">
+
+                            <div class="analysis-stat">
+
+                                <span>
+                                    Solar Production
+                                </span>
+
+                                <strong id="monthSolar">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="analysis-stat">
+
+                                <span>
+                                    Avg. Solar / Day
+                                </span>
+
+                                <strong id="monthAvgSolar">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="analysis-stat">
+
+                                <span>
+                                    Grid Import
+                                </span>
+
+                                <strong id="monthImport">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="analysis-stat">
+
+                                <span>
+                                    Grid Export
+                                </span>
+
+                                <strong id="monthExport">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="analysis-stat">
+
+                                <span>
+                                    Avg. Import/day
+                                </span>
+
+                                <strong id="monthAvgImport">
+                                    --
+                                </strong>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <div class="col-6">
+
+                            <div class="analysis-stat">
+
+                                <span>
+                                    Avg. Export / Day
+                                </span>
+
+                                <strong id="monthAvgExport">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+        <!-- Forecast -->
+
+        <div class="col-12 col-lg-6">
+
+            <div class="card border-0 shadow-sm h-100">
+
+                <div class="card-body p-4">
+
+
+                    <h5 class="fw-bold mb-2">
+
+                        <i class="bi bi-graph-up-arrow me-2"></i>
+
+                        Month-End Forecast
+
+                    </h5>
+
+
+                    <p
+                        class="text-muted mb-4"
+                        id="forecastDescription"
+                    >
+                        Based on the average daily values recorded so far
+                    </p>
+
+
+
+                    <div class="forecast-grid">
+
+
+                        <!-- Solar -->
+
+                        <div class="forecast-item">
+
+                            <div class="forecast-icon solar-icon">
+
+                                <i class="bi bi-sun-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Solar Production
+                                </span>
+
+                                <strong id="forecastSolar">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh projected
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Consumption -->
+
+                        <div class="forecast-item">
+
+                            <div class="forecast-icon consumption-icon">
+
+                                <i class="bi bi-house-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Net Consumption
+                                </span>
+
+                                <strong id="forecastConsumption">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh projected
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Import -->
+
+                        <div class="forecast-item">
+
+                            <div class="forecast-icon import-icon">
+
+                                <i class="bi bi-arrow-down-circle-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Grid Import
+                                </span>
+
+                                <strong id="forecastImport">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh projected
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+
+                        <!-- Export -->
+
+                        <div class="forecast-item">
+
+                            <div class="forecast-icon export-icon">
+
+                                <i class="bi bi-arrow-up-circle-fill"></i>
+
+                            </div>
+
+                            <div>
+
+                                <span>
+                                    Grid Export
+                                </span>
+
+                                <strong id="forecastExport">
+                                    --
+                                </strong>
+
+                                <small>
+                                    kWh projected
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         DAILY READINGS
+    ================================================== -->
+
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+
+                        <i class="bi bi-table me-2"></i>
+
+                        Daily Readings
+
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Historical solar and grid data
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle">
+
+                    <thead class="table-light">
+
+                        <tr>
+
+                            <th>Date</th>
+
+                            <th>Solar</th>
+
+                            <th>Import Reading</th>
+
+                            <th>Export Reading</th>
+
+                            <th>Import</th>
+
+                            <th>Export</th>
+
+                            <th>Monthly Import</th>
+
+                            <th>Monthly Export</th>
+
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody id="readingsTable"></tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =================================================
+         ADD DAILY READING
+    ================================================== -->
+
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-body p-4">
+
+
+            <div class="d-flex align-items-center mb-4">
+
+                <div class="section-icon me-3">
+
+                    <i class="bi bi-plus-lg"></i>
+
+                </div>
+
+
+                <div>
+
+                    <h5 class="mb-1 fw-bold">
+                        Add Daily Reading
+                    </h5>
+
+                    <p class="text-muted mb-0">
+                        Enter your end-of-day meter readings
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <form
+                id="readingForm"
+                class="row g-3"
+            >
+
+
+                <!-- Date -->
+
+                <div class="col-12 col-md-6 col-lg-3">
+
+                    <label
+                        for="readingDate"
+                        class="form-label"
+                    >
+                        Date
+                    </label>
+
+                    <input
+                        type="date"
+                        id="readingDate"
+                        class="form-control"
+                        required
+                    >
+
+                </div>
+
+
+
+                <!-- Solar -->
+
+                <div class="col-12 col-md-6 col-lg-3">
+
+                    <label
+                        for="solarProductionInput"
+                        class="form-label"
+                    >
+                        Solar Production
+                    </label>
+
+                    <div class="input-group">
+
+                        <input
+                            type="number"
+                            id="solarProductionInput"
+                            class="form-control"
+                            step="0.01"
+                            min="0"
+                            placeholder="00.00"
+                            required
+                        >
+
+                        <span class="input-group-text">
+                            kWh
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Import Meter -->
+
+                <div class="col-12 col-md-6 col-lg-3">
+
+                    <label
+                        for="gridImportReading"
+                        class="form-label"
+                    >
+                        Import Meter Reading
+                    </label>
+
+                    <div class="input-group">
+
+                        <input
+                            type="number"
+                            id="gridImportReading"
+                            class="form-control"
+                            step="0.01"
+                            min="0"
+                            placeholder="00.00"
+                            required
+                        >
+
+                        <span class="input-group-text">
+                            kWh
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Export Meter -->
+
+                <div class="col-12 col-md-6 col-lg-3">
+
+                    <label
+                        for="gridExportReading"
+                        class="form-label"
+                    >
+                        Export Meter Reading
+                    </label>
+
+                    <div class="input-group">
+
+                        <input
+                            type="number"
+                            id="gridExportReading"
+                            class="form-control"
+                            step="0.01"
+                            min="0"
+                            placeholder="00.00"
+                            required
+                        >
+
+                        <span class="input-group-text">
+                            kWh
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- Save -->
+
+                <div class="col-12">
+
+                    <button
+                        type="submit"
+                        class="btn btn-primary px-4"
+                    >
+
+                        <i class="bi bi-save me-1"></i>
+
+                        Save Reading
+
+                    </button>
+
+                </div>
+
+            </form>
+
+
+
+            <div
+                id="message"
+                class="mt-3"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+
+
+</main>
+
+
+
+<!-- =====================================================
+     FOOTER
+====================================================== -->
+
+<footer class="text-center text-muted py-4">
+
+    <small>
+        Electricity Tracker - Developed by Shubham Saxena
+    </small>
+
+</footer>
+
+
+
+<!-- =====================================================
+     BOOTSTRAP JS
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js">
+</script>
+
+
+
+<!-- =====================================================
+     CHART.JS
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js">
+</script>
+
+
+
+<!-- =====================================================
+     SUPABASE
+====================================================== -->
+
+<script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
+</script>
+
+
+
+<!-- =====================================================
+     APPLICATION
+====================================================== -->
+
+<script src="app.js"></script>
+
+
+</body>
+
+</html>
