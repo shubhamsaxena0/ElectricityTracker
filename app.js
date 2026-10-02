@@ -409,6 +409,8 @@ async function loadReadings() {
         .from("dailyreadings")
 
         .select("*")
+		
+		.eq("is_visible", true)
 
         .order(
             "reading_date",
@@ -518,6 +520,12 @@ function renderTable(data) {
                 <td>
                     ${formatNullable(
                         row.export_so_far
+                    )}
+                </td>
+				
+				 <td>
+                    ${formatNullable(
+                        row.closing_units
                     )}
                 </td>
 				
@@ -740,8 +748,7 @@ function updateCurrentMonth(
     });
 
 
-    const daysWithConsumption = new Date().getDate()-1;
-
+    const daysWithConsumption = rows.length;//new Date().getDate()-1;
 
 
     const averageSolar =
@@ -852,7 +859,7 @@ function generateForecast(
     let gridExport = 0;
 
 
-    let validConsumptionDays = new Date().getDate()-1;
+    let validConsumptionDays = daysRecorded;//new Date().getDate()-1;
 
 
     rows.forEach(row => {
