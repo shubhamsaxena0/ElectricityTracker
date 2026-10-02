@@ -59,8 +59,7 @@ document.addEventListener(
 function setCurrentDate() {
 
     const today =
-        new Date(new Date().setDate(new Date().getDate() - 1));
-
+        new Date();
 
     document.getElementById(
         "currentDate"
@@ -73,7 +72,9 @@ function setCurrentDate() {
                 year: "numeric"
             }
         );
-
+		
+	const yesterday =
+        new Date(new Date().setDate(new Date().getDate() - 1));
 
     document.getElementById(
         "readingDate"
@@ -212,7 +213,7 @@ form.addEventListener(
 			
 			.from("dailyreadings")
 			
-			.select("reading_date, grid_import_reading, grid_export_reading")
+			.select("reading_date, grid_import_reading, grid_export_reading, closing_units")
 			
 			.lt("reading_date", firstDayOfMonthString)
 			
@@ -244,6 +245,8 @@ form.addEventListener(
         let gridExport = null;
 
         let consumption = null;
+		
+		let closingUnits = null;
 
 
         /* ---------------------------------------------
@@ -312,6 +315,17 @@ form.addEventListener(
                         previousMonthLastRow.grid_export_reading
                     )
                 );
+				
+			const previousClosingUnits = Number(previousMonthLastRow.closing_units) || 0;
+			
+			closingUnits = round(
+							Math.max(
+										0,
+										previousClosingUnits +
+										gridExportNet -
+										gridImportNet
+									)
+							);
 
         }
 
@@ -350,7 +364,10 @@ form.addEventListener(
                         gridImportNet,
 
                     export_so_far:
-                        gridExportNet
+                        gridExportNet,
+						
+                    closing_units:
+                        closingUnits
                 },
                 {
                     onConflict:
