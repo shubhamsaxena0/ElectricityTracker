@@ -119,8 +119,7 @@ form.addEventListener(
     "submit",
     async (event) => {
 
-        event.preventDefault();
-
+        event.preventDefault();		
 
         const readingDate =
             document.getElementById(
@@ -243,6 +242,10 @@ form.addEventListener(
         let gridImport = null;
 
         let gridExport = null;
+
+		let gridImportNet = null;
+        
+		let gridExportNet = null;
 
         let consumption = null;
 		
